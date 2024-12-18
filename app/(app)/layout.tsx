@@ -1,7 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
-export default async function ProtectedPage() {
+
+interface ProtectedLayoutProps {
+  children: React.ReactNode;
+}
+
+export default async function ProtectedLayout({
+  children,
+}: ProtectedLayoutProps) {
   const supabase = await createClient();
 
   const {
@@ -13,8 +20,8 @@ export default async function ProtectedPage() {
   }
 
   return (
-    <div className="flex-1 w-full flex flex-col gap-12">
-      Protected page
+    <div className="w-full h-full ">
+      {children}
     </div>
   );
 }

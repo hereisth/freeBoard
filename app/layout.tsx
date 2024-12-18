@@ -3,8 +3,8 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import Header from "@/components/header";
 
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
+const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
+  ? `https://${process.env.NEXT_PUBLIC_SITE_URL}`
   : "http://localhost:3000";
 
 export const metadata = {
@@ -27,14 +27,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <main className="min-h-screen flex flex-col items-center">
-            <div className="flex-1 w-full flex flex-col gap-20 items-center">
-              <Header />
-              <div className="flex flex-col gap-20 max-w-5xl p-5">
-                {children}
-              </div>
-            </div>
-          </main>
+          {children}
         </ThemeProvider>
       </body>
     </html>

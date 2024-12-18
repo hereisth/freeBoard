@@ -138,11 +138,12 @@ export const signInWithGitHub = async () => {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?redirect_to=/dashboard`
     }
   });
 
   if (error) {
+    console.error("signInWithGitHub error", error);
     return encodedRedirect("error", "/sign-in", error.message);
   }
 
