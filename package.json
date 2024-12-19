@@ -25,7 +25,8 @@
     "prettier": "^3.3.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "simple-icons": "^13.21.0"
+    "simple-icons": "^13.21.0",
+    "sonner": "^1.7.1"
   },
   "devDependencies": {
     "@types/node": "22.9.0",

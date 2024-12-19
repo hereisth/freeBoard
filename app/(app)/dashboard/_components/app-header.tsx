@@ -2,6 +2,7 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Edit, Grid2x2Icon, List } from "lucide-react";
+import { CreateNewBoardButton } from "./create-new-board-button";
 
 export function AppHeader() {
   return (
@@ -11,15 +12,7 @@ export function AppHeader() {
       </div>
 
       <div className="flex items-center">
-        <Button
-          variant="ghost"
-          onClick={() => {
-            // create a new board item in supabase
-            console.log("create a new board item in supabase");
-          }}
-        >
-          <Edit className="w-4 h-4" />
-        </Button>
+        <CreateNewBoardButton />
 
         <Button
           variant="ghost"

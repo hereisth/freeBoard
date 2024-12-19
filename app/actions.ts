@@ -4,6 +4,7 @@ import { encodedRedirect } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { revalidatePath } from 'next/cache'
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -149,3 +150,35 @@ export const signInWithGitHub = async () => {
 
   return redirect(data.url);
 };
+
+export async function createBoard() {
+  const supabase = await createClient()
+  
+  // 获取当前用户
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) {
+    throw new Error('未授权')
+  }
+
+  // 创建新board
+  const { data: board, error } = await supabase
+    .from('boards')
+    .insert({
+      user_id: user.id,
+      name: 'untitled',  // 默认名称
+      description: '',     // 默认描述为空
+      is_public: false,    // 默认不公开
+      is_favorite: false,  // 默认不收藏
+    })
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  // 重新验证dashboard页面
+  revalidatePath('/dashboard')
+
+  return board
+}
