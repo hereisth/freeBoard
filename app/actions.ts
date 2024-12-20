@@ -4,7 +4,8 @@ import { encodedRedirect } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { revalidatePath } from 'next/cache'
+import { revalidatePath } from 'next/cache';
+import { subDays } from "date-fns";
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -152,12 +153,12 @@ export const signInWithGitHub = async () => {
 };
 
 export async function createBoard() {
-  const supabase = await createClient()
-  
+  const supabase = await createClient();
+
   // 获取当前用户
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) {
-    throw new Error('未授权')
+    throw new Error("unauthorized");
   }
 
   // 创建新board
@@ -165,20 +166,131 @@ export async function createBoard() {
     .from('boards')
     .insert({
       user_id: user.id,
-      name: 'untitled',  // 默认名称
-      description: '',     // 默认描述为空
-      is_public: false,    // 默认不公开
-      is_favorite: false,  // 默认不收藏
+      name: 'untitled',
+      description: '',
+      is_public: false,
+      is_favorite: false,
     })
     .select()
-    .single()
+    .single();
 
   if (error) {
-    throw new Error(error.message)
+    throw new Error(error.message);
   }
 
   // 重新验证dashboard页面
-  revalidatePath('/dashboard')
+  revalidatePath('/dashboard');
 
-  return board
+  return board;
+}
+
+// fetch all boards belong to the user
+export async function fetchAllBoards() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("unauthorized");
+  }
+
+  // fetch all boards belong to the user
+  const { data, error } = await supabase
+    .from('boards')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('updated_at', { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+}
+
+
+// fetch all boards belong to the user and marked as favorite
+export async function fetchAllFavoriteBoards() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("unauthorized");
+  }
+
+  const { data, error } = await supabase
+    .from('boards')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('is_favorite', true)
+    .order('updated_at', { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+// fetch boards updated in the last 7 days
+export async function fetchBoardsUpdatedInLast7Days() {
+  const supabase = await createClient();
+  const { 
+    data: { user },
+    error: userError
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("unauthorized");
+  }
+
+  const { data, error } = await supabase
+    .from('boards')
+    .select('*')
+    .eq('user_id', user.id)
+    .gte('updated_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+    .order('updated_at', { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+
+// add a board to favorite
+export async function addBoardToFavorite(boardId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('boards')
+    .update({ is_favorite: true })
+    .eq('id', boardId)
+    .select();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+// remove a board from favorite
+export async function removeBoardFromFavorite(boardId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('boards')
+    .update({ is_favorite: false })
+    .eq('id', boardId)
+    .select();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
 }
