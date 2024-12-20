@@ -20,7 +20,7 @@ export default async function ProtectedLayout({
   }
 
   return (
-    <div className="w-full h-full ">
+    <div className="w-full h-full relative">
       {children}
       <Toaster />
     </div>

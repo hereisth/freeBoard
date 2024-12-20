@@ -1,6 +1,8 @@
 "use client";
 
-import { use, useEffect } from "react";
+import { use } from "react";
+import { Tldraw } from "tldraw";
+import 'tldraw/tldraw.css';
 
 type SearchParams = {
   boardId: string;
@@ -12,5 +14,10 @@ interface BoardIdPageProps {
 
 export default function BoardPage({ params }: BoardIdPageProps) {
   const { boardId } = use(params);
-  return <div>Board Page with boardId: {boardId}</div>;
+
+  return (
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }} id="tldraw-canvas">
+      <Tldraw persistenceKey={boardId} />
+    </div>
+  );
 }

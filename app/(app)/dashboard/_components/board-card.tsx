@@ -6,6 +6,7 @@ import { formatTimeToNow } from "@/lib/utils";
 import { Tables } from "@/types/supabase";
 import { Heart } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface BoardCardProps {
   board: Tables<"boards">;
@@ -14,6 +15,7 @@ interface BoardCardProps {
 export function BoardCard({ board }: BoardCardProps) {
 
   const [isFavorite, setIsFavorite] = useState(board.is_favorite);
+  const router = useRouter();
 
   const toggleFavorite = async () => {
     const newIsFavorite = !isFavorite;
@@ -23,6 +25,10 @@ export function BoardCard({ board }: BoardCardProps) {
     } else {
       await removeBoardFromFavorite(board.id);
     }
+  };
+
+  const onDoubleClick = () => {
+    router.push(`/board/${board.id}`);
   };
 
   return (
@@ -42,7 +48,7 @@ export function BoardCard({ board }: BoardCardProps) {
 
       <div
         onClick={() => { }}
-        onDoubleClick={() => { }}
+        onDoubleClick={onDoubleClick}
         className="flex flex-1 pl-4 justify-between "
       >
         <div>
