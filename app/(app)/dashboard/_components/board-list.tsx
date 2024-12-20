@@ -1,7 +1,8 @@
+import { Tables } from "@/types/supabase";
 import { BoardCard } from "./board-card";
 
 interface BoardListProps {
-  boards: any[];
+  boards: Tables<"boards">[];
 }
 
 export function BoardList({ boards }: BoardListProps) {

@@ -3,12 +3,12 @@
 import { addBoardToFavorite, removeBoardFromFavorite } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { formatTimeToNow } from "@/lib/utils";
+import { Tables } from "@/types/supabase";
 import { Heart } from "lucide-react";
 import { useState } from "react";
 
 interface BoardCardProps {
-  // TODO: 需要修改为Board类型
-  board: any;
+  board: Tables<"boards">;
 }
 
 export function BoardCard({ board }: BoardCardProps) {
