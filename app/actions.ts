@@ -5,7 +5,35 @@ import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from 'next/cache';
-import { subDays } from "date-fns";
+import { Boards } from "@/types/supabase";
+import { TLSessionStateSnapshot, TLStoreSnapshot } from "@tldraw/editor";
+import type { Database as GeneratedDatabase } from '@/types/supabase';
+
+
+// 扩展 Supabase 生成的类型
+interface Database extends GeneratedDatabase {
+  public: {
+    Tables: {
+      boards: {
+        Row: GeneratedDatabase['public']['Tables']['boards']['Row'] & {
+          tldraw_document: TLStoreSnapshot;
+          tldraw_session: TLSessionStateSnapshot;
+        };
+        Insert: GeneratedDatabase['public']['Tables']['boards']['Insert'] & {
+          tldraw_document?: TLStoreSnapshot;
+          tldraw_session?: TLSessionStateSnapshot;
+        };
+        Update: GeneratedDatabase['public']['Tables']['boards']['Update'] & {
+          tldraw_document?: TLStoreSnapshot;
+          tldraw_session?: TLSessionStateSnapshot;
+        };
+        Relationships: GeneratedDatabase['public']['Tables']['boards']['Relationships'];
+      };
+    } & Omit<GeneratedDatabase['public']['Tables'], 'boards'>;
+  } & Omit<GeneratedDatabase['public'], 'Tables'>;
+}
+
+
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -239,7 +267,7 @@ export async function fetchAllFavoriteBoards() {
 // fetch boards updated in the last 7 days
 export async function fetchBoardsUpdatedInLast7Days() {
   const supabase = await createClient();
-  const { 
+  const {
     data: { user },
     error: userError
   } = await supabase.auth.getUser();
@@ -292,5 +320,69 @@ export async function removeBoardFromFavorite(boardId: string) {
     throw new Error(error.message);
   }
 
+  return data;
+}
+
+export async function saveDocumentState(documentId: Boards['id'], document: TLStoreSnapshot) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('boards')
+    .update({ tldraw_document: JSON.stringify(document) })
+    .eq('id', documentId)
+    .select();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+
+export async function saveSessionState(documentId: Boards['id'], userId: Boards['user_id'], session: TLSessionStateSnapshot) {
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('boards')
+    .update({ tldraw_session: JSON.stringify(session) })
+    .eq('id', documentId)
+    .eq('user_id', userId)
+    .select();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+
+export async function loadDocumentState(documentId: Boards['id']) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('boards')
+    .select('tldraw_document')
+    .eq('id', documentId)
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+}
+
+export async function loadSessionState(documentId: Boards['id'], userId: Boards['user_id']) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('boards')
+    .select('tldraw_session')
+    .eq('id', documentId)
+    .eq('user_id', userId)
+    .single();
+  if (error) {
+    throw new Error(error.message);
+  }
   return data;
 }

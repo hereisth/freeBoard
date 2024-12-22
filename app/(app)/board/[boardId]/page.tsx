@@ -1,9 +1,8 @@
 "use client";
 
 import { use } from "react";
-import { Tldraw } from "tldraw";
-import 'tldraw/tldraw.css';
-
+import { TldrawWrapper } from "./_components/tldraw-wapper";
+import { useAuth } from "@/hooks/useAuth";
 type SearchParams = {
   boardId: string;
 };
@@ -14,10 +13,15 @@ interface BoardIdPageProps {
 
 export default function BoardPage({ params }: BoardIdPageProps) {
   const { boardId } = use(params);
+  const { user } = useAuth();
+  if (!user) {
+    // go back to sign in page
+    return <div>Loading...</div>;
+  }
 
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }} id="tldraw-canvas">
-      <Tldraw persistenceKey={boardId} />
+    <div>
+      <TldrawWrapper boardId={boardId} userId={user.id} />
     </div>
   );
 }
